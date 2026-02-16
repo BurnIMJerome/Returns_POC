@@ -1,0 +1,6 @@
+google-adk
+google-generativeai
+msal
+requests
+python-dotenv
+pydantic
