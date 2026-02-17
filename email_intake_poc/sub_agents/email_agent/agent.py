@@ -13,7 +13,7 @@ email_agent = LlmAgent(
     tools=[
         read_unread_inbox,
         read_latest_inbox,
-        read_message_full,
+      
     ],
     output_key="email_records",
     
