@@ -15,6 +15,6 @@ email_agent = LlmAgent(
         read_latest_inbox,
       
     ],
-    output_key="email_records",
+    output_key="email_list",
     
 )
