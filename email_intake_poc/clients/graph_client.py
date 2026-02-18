@@ -13,26 +13,38 @@ class GraphMailClient:
     """Microsoft Graph REST client using App-only auth (client credentials)."""
 
     def __init__(self):
-        # Fail fast if missing config
-        missing = []
-        if not settings.AZURE_TENANT_ID: missing.append("AZURE_TENANT_ID")
-        if not settings.AZURE_CLIENT_ID: missing.append("AZURE_CLIENT_ID")
-        if not settings.AZURE_CLIENT_SECRET: missing.append("AZURE_CLIENT_SECRET")
-        if not settings.MAILBOX_UPN: missing.append("MAILBOX_UPN")
-        if missing:
-            raise ValueError(f"Missing env vars: {', '.join(missing)}")
-
+        # Do not raise during import — defer validation until the client is actually used.
         self.tenant_id = settings.AZURE_TENANT_ID
         self.client_id = settings.AZURE_CLIENT_ID
         self.client_secret = settings.AZURE_CLIENT_SECRET
 
-        self.authority = f"https://login.microsoftonline.com/{self.tenant_id}"
+        self.authority = (
+            f"https://login.microsoftonline.com/{self.tenant_id}"
+            if self.tenant_id
+            else None
+        )
         self._token: Optional[str] = None
+        # track whether configuration is complete
+        self._configured = bool(
+            self.tenant_id and self.client_id and self.client_secret and settings.MAILBOX_UPN
+        )
 
     def _get_token(self) -> str:
         # simple in-memory token cache
         if self._token:
             return self._token
+
+        if not self._configured:
+            missing = []
+            if not self.tenant_id:
+                missing.append("AZURE_TENANT_ID")
+            if not self.client_id:
+                missing.append("AZURE_CLIENT_ID")
+            if not self.client_secret:
+                missing.append("AZURE_CLIENT_SECRET")
+            if not settings.MAILBOX_UPN:
+                missing.append("MAILBOX_UPN")
+            raise ValueError(f"Missing env vars: {', '.join(missing)}")
 
         app = msal.ConfidentialClientApplication(
             self.client_id,
