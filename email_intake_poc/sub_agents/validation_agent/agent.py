@@ -1,40 +1,47 @@
-from .instruction import VALIDATION_RULES
-
+__all__ = ["ValidationAgent", "validation_agent"]
 class ValidationAgent:
-    def __init__(self, bigquery_agent):
-        self.bigquery_agent = bigquery_agent
+    REQUIRED_FIELDS = ["RMA_ID", "Customer_ID"]
+    EITHER_FIELDS = ["Order_Number", "Invoice_Number"]
 
-    def validate_row(self, row):
-        errors = []
+validation_agent = ValidationAgent()
 
-        for field, rules in VALIDATION_RULES.items():
-            value = row.get(field, "")
-            if rules.get("required") and not value:
-                errors.append(f"{field} is empty.")
-            if rules.get("numeric") and value and not value.isdigit():
-                errors.append(f"{field} must be numeric.")
+def validate(self, row):
+        """
+        Validate exactly ONE RMA row.
+        Returns:
+          - None if valid
+          - dict with business-readable error if invalid
+        """
 
-        # Optional: check RMA_ID in BigQuery
-        rma_id = row.get("RMA_ID")
-        if rma_id and self.bigquery_agent:
-            query = f"SELECT COUNT(*) FROM Orders WHERE RMA_ID='{rma_id}'"
-            exists = self.bigquery_agent.query(query)
-            if not exists or (len(exists) > 0 and exists[0].get("f0_") == 0):
-                errors.append(f"RMA_ID '{rma_id}' not found in BigQuery.")
+        missing_fields = []
 
-        return errors
+        # Required fields
+        for field in self.REQUIRED_FIELDS:
+            if not row.get(field):
+                missing_fields.append(field)
 
-    def process_rows(self, rows):
-        all_errors = {}
-        for row in rows:
-            row_errors = self.validate_row(row)
-            if row_errors:
-                all_errors[row.get("RMA_ID", "Unknown")] = row_errors
+        # Either Order_Number or Invoice_Number
+        has_order_or_invoice = any(row.get(field) for field in self.EITHER_FIELDS)
+        if not has_order_or_invoice:
+            missing_fields.extend(self.EITHER_FIELDS)
 
-        if not all_errors:
-            return "✅ All rows passed validation."
-        reply_lines = ["⚠️ Validation Errors Found:"]
-        for rma_id, errs in all_errors.items():
-            reply_lines.append(f"RMA_ID: {rma_id}")
-            reply_lines.extend([f"  - {e}" for e in errs])
-        return "\n".join(reply_lines)
+        if missing_fields:
+            return {
+                "status": "error",
+                "error_type": "validation_error",
+                "message": (
+                    "We’re missing some required information to create the RMA. "
+                    "Please review the details below and resend the request."
+                ),
+                "missing_information": sorted(set(missing_fields)),
+                "business_guidance": (
+                    "An RMA request must include a Customer ID and at least one "
+                    "reference number (either an Order Number or an Invoice Number)."
+                ),
+                "next_step": (
+                    "Please provide the missing information and submit the RMA request again."
+                ),
+            }
+
+        # Valid RMA
+        return None
