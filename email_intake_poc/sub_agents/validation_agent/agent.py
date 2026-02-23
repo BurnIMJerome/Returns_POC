@@ -1,47 +1,37 @@
-__all__ = ["ValidationAgent", "validation_agent"]
 class ValidationAgent:
-    REQUIRED_FIELDS = ["RMA_ID", "Customer_ID"]
+    # Fields required for validation
+    REQUIRED_FIELDS = ["Customer_ID"]
     EITHER_FIELDS = ["Order_Number", "Invoice_Number"]
 
-validation_agent = ValidationAgent()
-
-def validate(self, row):
+    # Public method to validate a single RMA object
+    def validate(self, row: dict):
         """
-        Validate exactly ONE RMA row.
-        Returns:
-          - None if valid
-          - dict with business-readable error if invalid
+        Validate a single extracted RMA object.
+        Returns None if valid, or a JSON error dict if invalid.
         """
-
         missing_fields = []
 
-        # Required fields
+        # Check required fields
         for field in self.REQUIRED_FIELDS:
             if not row.get(field):
                 missing_fields.append(field)
 
-        # Either Order_Number or Invoice_Number
-        has_order_or_invoice = any(row.get(field) for field in self.EITHER_FIELDS)
-        if not has_order_or_invoice:
+        # Check at least one of Order_Number or Invoice_Number exists
+        if not any(row.get(f) for f in self.EITHER_FIELDS):
             missing_fields.extend(self.EITHER_FIELDS)
 
+        # Return error JSON if validation fails
         if missing_fields:
             return {
                 "status": "error",
                 "error_type": "validation_error",
-                "message": (
-                    "We’re missing some required information to create the RMA. "
-                    "Please review the details below and resend the request."
-                ),
-                "missing_information": sorted(set(missing_fields)),
-                "business_guidance": (
-                    "An RMA request must include a Customer ID and at least one "
-                    "reference number (either an Order Number or an Invoice Number)."
-                ),
+                "message": "Required RMA identifiers are missing.",
+                "missing_fields": sorted(set(missing_fields)),
                 "next_step": (
-                    "Please provide the missing information and submit the RMA request again."
+                    "Ensure Customer_ID and either Invoice_Number or "
+                    "Order_Number are present before retrying."
                 ),
             }
 
-        # Valid RMA
+        # If all required fields exist, validation passes
         return None

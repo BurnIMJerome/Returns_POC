@@ -2,12 +2,13 @@ from google.adk.agents import LlmAgent
 from .sub_agents.email_agent.agent import email_agent
 from .sub_agents.bigquery_agent.agent import bigquery_agent
 from .sub_agents.bigquery_retrieval_agent.agent import bigquery_retrieval_agent
-from .sub_agents.validation_agent.agent import validation_agent
 
 from .tools.email_tools import (
     read_message_full,
 )
 
+from email_intake_poc.tools.validation_tools import validate_rma
+print(validate_rma)
 
 root_agent = LlmAgent(
     name="main_agent",
@@ -33,26 +34,17 @@ Routing Rules:
    → Output the full email content to the user.
    → Do NOT call bigquery_agent.
 
-3) If user says "process N":
-   → Use email_list to resolve selection (N) to message_id.
+3) If user says "process N" (e.g., "process 1")::
+   → Use email_list to resolve the user's selection (N) to message_id.
    → Call read_message_full(message_id).
    → Save the tool result as selected_email (SINGLE object).
 
-   → MANDATORY: Call validation_agent with selected_email.
-      Save result as validation_result.
-
-   → If validation_result.status == "not_rma":
-        - Return validation_result to the user.
-        - STOP. Do NOT call bigquery_agent.
-
-   → If validation_result.status == "error":
-        - Return validation_result to the user.
-        - STOP. Do NOT call bigquery_agent.
-
-   → ONLY IF validation_result indicates valid RMA:
+   → MANDATORY: Call validate_rma with selected_email.
+   → If validate_rma returns an error:
+        - Return the error JSON to the user. Make it naural language friendly if possible.
+        - STOP.
+   → Otherwise:
         - Call bigquery_agent with selected_email.
-
-   → Do not print the full email body unless the user asked to view it.
 
 4) If user asks to find/search/lookup an existing record (e.g., "Find RMA 12345" or "Look up status for Customer C-99"):
    → Identify the search criteria (RMA_ID, Customer_ID, or Order_Number).
@@ -69,20 +61,6 @@ Hard Rules:
 - "process N" implies extraction + insert; "open/read/view N" implies display only.
 """,
 
-    tools=[read_message_full],  
+    tools=[read_message_full,validate_rma],  
    sub_agents=[email_agent, bigquery_agent, bigquery_retrieval_agent],
 )
-
-# ---
-# Real workflow function to process an email by message_id
-def process_email(message_id):
-   # Step 1: Get the full email object
-   selected_email = read_message_full(message_id)
-   # Step 2: Validate before inserting
-   validation_result = validation_agent.validate(selected_email)
-   if validation_result:
-      print("Validation failed:", validation_result)
-      return  # Stop processing or handle error as needed
-   # Step 3: Only insert if validation passes
-   bigquery_agent(selected_email)
-# ---
