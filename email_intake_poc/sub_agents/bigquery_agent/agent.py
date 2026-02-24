@@ -1,7 +1,6 @@
 from google.adk.agents import LlmAgent
 import google.auth
 
-from email_intake_poc.sub_agents.validation_agent.agent import ValidationAgent
 from .instruction import bigquery_agent_instruction
 from pydantic import BaseModel, Field
 from typing import Optional, Literal, Union
@@ -104,49 +103,3 @@ bigquery_agent = LlmAgent(
     ##tools=[insert_rma_header_to_bigquery],
 
 )
-
-
-def process_rma(bigquery_result, bigquery_client):
-    validation_agent = ValidationAgent()
-
-    # Step 0: Call validation agent first
-    validation_response = validation_agent.validate(bigquery_result)
-
-    if validation_response:
-        # Validation failed → return JSON error
-        return validation_response
-
-    # Step 1: NOT_RMA check
-    if bigquery_result.get("status") == "not_rma":
-        return bigquery_result
-
-    # Step 2: Normalization
-    rma = bigquery_result
-    if rma.get("RMA_ID") and len(rma["RMA_ID"]) > 20:
-        rma["RMA_ID"] = rma["RMA_ID"][:20]
-
-    rma["Status"] = "Pending"
-    rma["Created_By"] = "agentic-ai"
-    rma["Source_Channel"] = "Email"
-    rma["Approved_Date"] = rma.get("Approved_Date")
-    rma["Closed_Date"] = rma.get("Closed_Date")
-
-    # Step 3: Insert into BigQuery
-    try:
-        bigquery_client.insert_row(
-            project="agentic-ai-poc-486504",
-            dataset="RMA",
-            table="RMA_Header",
-            row=rma
-        )
-    except Exception as e:
-        return {
-            "status": "error",
-            "error_type": "bigquery_insert_error",
-            "message": "Failed to insert RMA record into BigQuery.",
-            "details": str(e),
-            "next_step": "Verify BigQuery permissions, quota project configuration, and table schema."
-        }
-
-    # Step 4: Success
-    return f"RMA Record Successfully Created with RMA_ID: {rma.get('RMA_ID', 'NULL')}"

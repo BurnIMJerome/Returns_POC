@@ -1,4 +1,6 @@
-from .agent import ValidationAgent
-from .instruction import VALIDATION_RULES
+from .agent import validation_agent
 
-__all__ = ["ValidationAgent", "VALIDATION_RULES"]
+# If you want to export the class as well:
+# from .agent import LlmAgent
+
+__all__ = ["validation_agent"]
