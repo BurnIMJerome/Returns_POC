@@ -16,5 +16,5 @@ class Settings:
     AZURE_CLIENT_SECRET = os.getenv('AZURE_CLIENT_SECRET')
 
     MAILBOX_UPN = os.getenv("MAILBOX_UPN", "")
-
+    GOOGLE_MODEL = "gemini-2.5-flash"
 settings = Settings()

@@ -1,10 +1,36 @@
+from unittest import result
+import copy 
 from google.adk.agents import LlmAgent
+import google.auth
 from pydantic import BaseModel, Field
-from typing import Optional, Literal, Union
+from typing import Dict, Optional, Literal, Union, Any
 from datetime import datetime
-
 from .instruction import validation_agent_instruction
+from google.adk.tools.tool_context   import ToolContext 
+from google.adk.agents.callback_context import CallbackContext
+from google.adk.models import LlmResponse
 
+from ...tools.validation_tools import (
+    validateEmailIfRMA,
+)
+
+# -bigquery reference start
+from google.adk.tools.bigquery import BigQueryCredentialsConfig
+from google.adk.tools.bigquery import BigQueryToolset
+from google.adk.tools.bigquery.config import BigQueryToolConfig
+from google.adk.tools.bigquery.config import WriteMode
+from google.genai import types
+tool_config = BigQueryToolConfig(write_mode=WriteMode.ALLOWED)
+
+application_default_credentials, _ = google.auth.default()
+credentials_config = BigQueryCredentialsConfig(
+    credentials=application_default_credentials
+)
+
+# Instantiate a BigQuery toolset
+bigquery_toolset = BigQueryToolset(
+     credentials_config=credentials_config,bigquery_tool_config=tool_config
+)
 
 # -----------------------------
 # Output Schemas
@@ -31,6 +57,19 @@ class ValidationErrorOutput(BaseModel):
     missing_fields: list[str]
     next_step: str
 
+class InsertMetadata(BaseModel):
+        insert_status: Optional[Literal["inserted", "failed", "skipped"]] = Field(
+        default=None,
+        description="Insert outcome. 'skipped' for not_rma or validation_error."
+    )
+        inserted_row_id: Optional[str] = Field(
+        default=None,
+        description="Row id/insert id if available from the insert tool."
+    )
+        insert_error: Optional[str] = Field(
+        default=None,
+        description="Insert error details if insert failed."
+    )
 
 class RMAOutput(BaseModel):
     Customer_ID: str = Field(
@@ -79,6 +118,10 @@ class RMAOutput(BaseModel):
         default="Email",
         description="System-defined source channel."
     )
+    insert_metadata: Optional[InsertMetadata] = Field(
+        default=None,
+        description="Metadata about the insert operation."
+    )
 
 class OutputSchema(BaseModel):
     """
@@ -90,18 +133,44 @@ class OutputSchema(BaseModel):
         RMAOutput
     ]
 
-
 # -----------------------------
 # Validation Agent
 # -----------------------------
 
+def after_model_callback_def(callback_context: CallbackContext, llm_response: LlmResponse
+) -> Optional[LlmResponse]:
+    """
+    After the model produces output, this callback just save the response in state.
+    """
+       # Validate structure safely
+    if (
+        not llm_response
+        or not llm_response.content
+        or not llm_response.content.parts
+        or len(llm_response.content.parts) == 0
+        or not hasattr(llm_response.content.parts[0], "text")
+        or not llm_response.content.parts[0].text
+        or not llm_response.content.parts[0].text.strip()
+    ):
+         print("\n[AFTER MODEL] LLM response is empty or malformed. No modifications.")
+         return llm_response
+    
+    modified_llm_response = copy.deepcopy(llm_response)
+
+    # Assuming the main text is in the first part
+    original_text = modified_llm_response.content.parts[0].text
+    current_text = original_text  # Start with original for modification
+
+    print(f"\n[AFTER MODEL] Original LLM response: '{original_text}'")
+    callback_context.state["validation_result"] = original_text
+    
+    return None
+
 validation_agent = LlmAgent(
     name="validation_agent",
     model="gemini-2.5-flash",
-    instruction=validation_agent_instruction,
     output_schema=OutputSchema,
-    output_key="validation_result",
-    tools=[]  # ✅ NO TOOLS — validation only
+    instruction=validation_agent_instruction,
+    tools=[validateEmailIfRMA, bigquery_toolset],
+    after_model_callback=after_model_callback_def
 )
-
-__all__ = ["validation_agent"]

@@ -92,7 +92,7 @@ class OutputSchema(BaseModel):
     result: Union[NotRMAOutput, RMAOutput]
 
 
-bigquery_agent = LlmAgent(
+bigquery_insert_agent = LlmAgent(
     name="bigquery_agent",
     model="gemini-2.5-flash",
     output_schema=OutputSchema,

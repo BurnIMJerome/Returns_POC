@@ -1,12 +1,20 @@
-# email_intake_poc/tools/validation_tools.py
+import re
+from google.adk.tools.tool_context import ToolContext
 
-from email_intake_poc.sub_agents.validation_agent.agent import ValidationAgent
+def validateEmailIfRMA(tool_context: ToolContext) -> bool:
+    """Returns True if subject contains whole word 'RMA' (case-sensitive)."""
+    
+    full_message = tool_context.state.get("full_message")
 
-_validation_agent = ValidationAgent()
+    if not full_message:
+        return False
+    
+    subject = full_message.get("subject", "")
+    body = full_message.get("body", {}).get("content", "")
 
-def validate_rma(selected_email: dict):
-    """
-    Validate a single extracted RMA object.
-    Returns None if valid, or an error JSON if invalid.
-    """
-    return _validation_agent.validate(selected_email)
+    print(f"DEBUG Subject: {subject}")
+    print(f"DEBUG Body: {body}")
+
+
+    # Case-sensitive whole-word match
+    return bool(re.search(r"\bRMA\b", subject))
