@@ -14,6 +14,11 @@ from ...tools.validation_tools import (
     validateEmailIfRMA,
 )
 
+# Guardrails import
+from ...guardrails import (
+    before_model_guard,
+)
+
 # -bigquery reference start
 from google.adk.tools.bigquery import BigQueryCredentialsConfig
 from google.adk.tools.bigquery import BigQueryToolset
@@ -172,5 +177,6 @@ validation_agent = LlmAgent(
     output_schema=OutputSchema,
     instruction=validation_agent_instruction,
     tools=[validateEmailIfRMA, bigquery_toolset],
-    after_model_callback=after_model_callback_def
+    after_model_callback=after_model_callback_def,
+    before_model_callback=before_model_guard, # Guardrails call
 )

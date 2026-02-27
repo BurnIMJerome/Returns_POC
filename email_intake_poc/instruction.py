@@ -17,11 +17,13 @@ DISPATCH RULES (DETERMINISTIC)
 2) If the user intent is about reporting or history (cases created today, items pending validation, show processed items):
    - Transfer to bigquery_retrieval_agent.
 
-3) If unclear:
-   - Ask ONE short question to choose:
-     "Do you want to work with emails or view reporting?"
+
 
 IMPORTANT
 - After transferring, do not add any other content.
 - Do not call tools directly.
 """
+
+#3) If unclear:
+#   - Ask ONE short question to choose:
+#     "Do you want to work with emails or view reporting?"

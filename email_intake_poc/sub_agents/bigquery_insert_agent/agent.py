@@ -17,6 +17,11 @@ from google.adk.tools.bigquery.config import WriteMode
 from google.genai import types
 tool_config = BigQueryToolConfig(write_mode=WriteMode.ALLOWED)
 
+# Guardrails import
+from ...guardrails import (
+    before_model_guard,
+)
+
 application_default_credentials, _ = google.auth.default()
 credentials_config = BigQueryCredentialsConfig(
     credentials=application_default_credentials
@@ -98,7 +103,7 @@ bigquery_insert_agent = LlmAgent(
     output_schema=OutputSchema,
     output_key="bigquery_result",
     instruction=bigquery_agent_instruction,
-   
+    before_model_callback=before_model_guard, # Gaurdrails call   
     tools=[bigquery_toolset],
     ##tools=[insert_rma_header_to_bigquery],
 
