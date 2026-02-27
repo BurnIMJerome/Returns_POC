@@ -1,6 +1,8 @@
 from unittest import result
 import copy 
 from google.adk.agents import LlmAgent
+from google.adk.agents import callback_context
+from google.adk.agents import callback_context
 import google.auth
 from pydantic import BaseModel, Field
 from typing import Dict, Optional, Literal, Union, Any
@@ -137,12 +139,12 @@ class OutputSchema(BaseModel):
 # Validation Agent
 # -----------------------------
 
-def after_model_callback_def(callback_context: CallbackContext, llm_response: LlmResponse
+def after_model_callback_def(
+    callback_context: CallbackContext,
+    llm_response: LlmResponse
 ) -> Optional[LlmResponse]:
-    """
-    After the model produces output, this callback just save the response in state.
-    """
-       # Validate structure safely
+
+    # Validate structure safely
     if (
         not llm_response
         or not llm_response.content
@@ -150,20 +152,28 @@ def after_model_callback_def(callback_context: CallbackContext, llm_response: Ll
         or len(llm_response.content.parts) == 0
         or not hasattr(llm_response.content.parts[0], "text")
         or not llm_response.content.parts[0].text
-        or not llm_response.content.parts[0].text.strip()
     ):
-         print("\n[AFTER MODEL] LLM response is empty or malformed. No modifications.")
-         return llm_response
-    
+        print("\n[AFTER MODEL] LLM response is empty or malformed.")
+        return llm_response
+
     modified_llm_response = copy.deepcopy(llm_response)
+    original_text = modified_llm_response.content.parts[0].text.strip()
 
-    # Assuming the main text is in the first part
-    original_text = modified_llm_response.content.parts[0].text
-    current_text = original_text  # Start with original for modification
+    print(f"\n[AFTER MODEL] Original LLM response: {original_text}")
 
-    print(f"\n[AFTER MODEL] Original LLM response: '{original_text}'")
+    # Save raw validation result
     callback_context.state["validation_result"] = original_text
-    
+
+    case_id = callback_context.state.get("CaseID")
+
+    # 🔹 SIMPLE STRING CHECK
+    # if case_id and '"insert_status": "inserted"' in original_text:
+    #     success_message = f"Successfully created case. Your Case ID: {case_id}"
+    #     modified_llm_response.content.parts[0].text = success_message
+
+    #     print("[AFTER MODEL] Overriding response with success message.")
+    #     return modified_llm_response
+
     return None
 
 
@@ -180,6 +190,6 @@ validation_agent = LlmAgent(
     model="gemini-2.5-flash",
     output_schema=OutputSchema,
     instruction=validation_agent_instruction,
-    tools=[validateEmailIfRMA, bigquery_toolset, CreateCase],
+    tools=[bigquery_toolset, CreateCase],
     after_model_callback=after_model_callback_def,
 )

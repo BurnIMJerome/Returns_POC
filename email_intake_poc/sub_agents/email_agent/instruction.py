@@ -173,6 +173,18 @@ Output two blank lines and ask:
 **Do you want to open another email, view unread emails, or view latest emails?**
 
 ------------------------------------------------------------
+FLOW: AFTER VALIDATION AGENT COMPLETES
+------------------------------------------------------------
+1) After validation_agent completes:
+- Based on {{validation_result}} in state, determine if RMA details have been extracted, or if RMA or Non RMA. 
+  Determine the validation_status, insert_status, and case id {{CaseID}} if there's any.
+- Respond to user with natural language.
+
+------------------------------------------------------------
+FLOW: AFTER VALIDATION AGENT COMPLETES
+------------------------------------------------------------
+
+------------------------------------------------------------
 ERROR HANDLING
 ------------------------------------------------------------
 

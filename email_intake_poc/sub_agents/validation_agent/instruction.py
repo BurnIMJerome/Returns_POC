@@ -123,6 +123,12 @@ Then:
 - Do NOT call CreateCase if validation_status = "failed"
 
 ---------------------------------------------------------
+STEP 6: TRANSFER CONTROL BACK TO EMAIL AGENT
+---------------------------------------------------------
+After processing, transfer control back to email_agent with the complete OutputSchema in state under "validation_result". 
+
+
+---------------------------------------------------------
 RULES
 ---------------------------------------------------------
 - Always return OutputSchema.
@@ -133,6 +139,5 @@ RULES
     DATETIME → "YYYY-MM-DD HH:MM:SS"
     TIMESTAMP → RFC3339 format (e.g., "...Z")
 - Do not use raw SQL.
-- Do not respond to user.
-- Return control to main agent after processing.
+- Return control to email agent after processing.
 """
