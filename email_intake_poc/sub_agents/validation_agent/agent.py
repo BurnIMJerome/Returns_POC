@@ -166,11 +166,20 @@ def after_model_callback_def(callback_context: CallbackContext, llm_response: Ll
     
     return None
 
+
+
+def CreateCase(tool_context: ToolContext):
+    """Create Case."""
+    
+    tool_context.state["CaseID"] = "REQ123456"
+
+    return
+
 validation_agent = LlmAgent(
     name="validation_agent",
     model="gemini-2.5-flash",
     output_schema=OutputSchema,
     instruction=validation_agent_instruction,
-    tools=[validateEmailIfRMA, bigquery_toolset],
-    after_model_callback=after_model_callback_def
+    tools=[validateEmailIfRMA, bigquery_toolset, CreateCase],
+    after_model_callback=after_model_callback_def,
 )
