@@ -1,0 +1,1 @@
+{"RMA_ID": "test-rma-001", " Customer_ID": "test123", "Order_Number": "SO-000000", "Invoice_Number": "00000000", "RMA_Type": "Test", "Reason_Code": "Test insert", "Status": "Pending", "Priority": "Low", "Created_Date": "2026-02-28T00:00:00Z", "Approved_Date": "", "Closed_Date": "", "Created_By": "bq-cli", "Source_Channel": "Manual"}

@@ -1,9 +1,11 @@
 import os
 from dotenv import load_dotenv
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ENV_PATH = os.path.join(BASE_DIR, '.env')
 load_dotenv(ENV_PATH)
+
+
 
 class Settings:
     
@@ -17,4 +19,8 @@ class Settings:
 
     MAILBOX_UPN = os.getenv("MAILBOX_UPN", "")
     GOOGLE_MODEL = "gemini-2.5-flash"
+
+    BIGQUERY_PROJECT = os.getenv("BIGQUERY_PROJECT", "agentic-ai-poc-486504")
+    BIGQUERY_DATASET = os.getenv("BIGQUERY_DATASET", "RMA")
+    BIGQUERY_TABLE = os.getenv("BIGQUERY_TABLE", "RMA_Header")
 settings = Settings()
