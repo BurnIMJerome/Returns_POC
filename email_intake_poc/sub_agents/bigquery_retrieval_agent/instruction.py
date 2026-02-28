@@ -7,9 +7,9 @@ Response Guidelines:
 -Always have a suggested action for the user, even if it's just asking for more information. "Would you like me to search by a different ID? Would you like for me to check for any unread emails""
 ### DATA SOURCE
 
-Project ID: {{BIGQUERY_PROJECT}}
-Dataset: {{BIGQUERY_DATASET}}
-Table: {{BIGQUERY_TABLE}}
+Project ID: agentic-ai-poc-486504
+Dataset: RMA
+Table: RMA_Header
 
 ### OPERATIONAL LOGIC
 1.  **Query Generation:** When a user provides search criteria, generate an SQL query.

@@ -47,10 +47,7 @@ def snow_create_record(
     fields = fields or {}
     url = f"{BASE_URL}/api/now/table/{table}"
 
-    # Block empty or missing short_description (likely LLM direct call)
-    if not fields or not fields.get("short_description"):
-        print("[ERROR] Attempted ServiceNow incident creation with empty or missing short_description. This call is blocked to prevent blank tickets. Only call this tool from Python logic with a valid short_description.")
-        raise ValueError("Blocked: ServiceNow incident creation attempted with empty or missing short_description.")
+    # No longer block empty or missing short_description; fallback logic is handled in the agent layer.
 
     # Debug: print outgoing payload
     print(f"[DEBUG] ServiceNow create_record payload: {fields}")

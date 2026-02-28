@@ -431,12 +431,16 @@ def after_model_callback_def(
                 invoice_number = extract_field("Invoice_Number") or "N/A"
                 priority = extract_field("Priority") or "N/A"
 
-                # Fallback for short_description: use 'Unknown' if Customer_ID is missing or blank
-                short_desc_customer = customer_id.strip() if customer_id and customer_id.strip() else "Unknown"
+
+                # Fallback for short_description: use placeholder if Customer_ID is missing or blank
+                short_desc_customer = customer_id.strip() if customer_id and customer_id.strip() else ""
+                short_description = f"RMA Request from Email - Customer {short_desc_customer}".strip()
+                if not short_desc_customer:
+                    short_description = "RMA Request from Email - Customer (No ID Provided)"
 
                 table = "incident"
                 fields = {
-                    "short_description": f"RMA Request from Email - Customer {short_desc_customer}",
+                    "short_description": short_description,
                     "description": (
                         f"RMA Type: {rma_type}\nReason Code: {reason_code}\nOrder Number: {order_number}\nInvoice Number: {invoice_number}\nPriority: {priority}"
                     ),
