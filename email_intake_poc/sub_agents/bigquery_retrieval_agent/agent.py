@@ -4,7 +4,10 @@ from .instruction import bigquery_retrieval_agent_instruction
 from google.adk.tools.bigquery import (BigQueryToolset, BigQueryCredentialsConfig)
 from google.adk.tools.bigquery.config import (BigQueryToolConfig, WriteMode)
 import google.auth
-
+# Guardrails import
+from ...guardrails import (
+    before_model_guard,
+)
 
 # 1. Credentials
 application_default_credentials, _ = google.auth.default()
@@ -54,5 +57,6 @@ bigquery_retrieval_agent = Agent(
     description="A helpful assistant for retrieving information from BigQuery based on a single or multiple selected search criteria.",
     instruction=bigquery_retrieval_agent_instruction,
     tools=[bigquery_retrieval_toolset],
-    output_key="bigquery_retrieval_result"
+    output_key="bigquery_retrieval_result",
+    before_model_callback=before_model_guard, # Guardrails call
 )

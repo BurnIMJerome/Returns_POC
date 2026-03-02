@@ -7,6 +7,10 @@ from ...tools.email_tools import (
     read_latest_inbox,
     read_message_full,
 )
+# Guardrails import
+from ...guardrails import (
+    before_model_guard,
+)
 
 email_agent = LlmAgent(
     name="email_agent",
@@ -18,7 +22,7 @@ email_agent = LlmAgent(
         read_message_full,
       
     ],
-    #sub_agents=[validation_agent]
+    before_model_callback=before_model_guard, # Gaurdrails call  
 
     
 )

@@ -10,7 +10,10 @@ from ...tools.email_tools import (
     read_message_full,
     mark_message_read
 )
-
+# Guardrails import
+from ...guardrails import (
+    before_model_guard,
+)
 import json
 # -bigquery reference start
 from google.adk.tools.bigquery import BigQueryCredentialsConfig
@@ -165,6 +168,7 @@ bigquery_insert_agent = LlmAgent(
     output_schema=OutputSchema,
     output_key="bigquery_result",
     instruction=bigquery_agent_instruction,
+    before_model_callback=before_model_guard, # Gaurdrails call  
     tools=[bigquery_toolset],
     after_model_callback=after_model_callback_def,
 )

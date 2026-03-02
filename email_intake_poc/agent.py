@@ -4,17 +4,16 @@ from .sub_agents.email_agent.agent import email_agent
 from .sub_agents.bigquery_insert_agent.agent import bigquery_insert_agent
 from .sub_agents.bigquery_retrieval_agent.agent import bigquery_retrieval_agent
 from .instruction import main_agent_instruction
-from .tools.email_tools import (
-    read_unread_inbox,
-    read_latest_inbox,
-    read_message_full,
-)
 from .config import settings
 from google.adk.models import LlmResponse
 import copy 
 from typing import Dict, Optional, Literal, Union, Any
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.models import LlmResponse
+# Guardrails import
+from .guardrails import (
+    before_model_guard,
+)
 
 def after_model_callback_def(callback_context: CallbackContext, llm_response: LlmResponse
 ) -> Optional[LlmResponse]:
@@ -50,6 +49,7 @@ root_agent = LlmAgent(
     model=settings.GOOGLE_MODEL,
     instruction=main_agent_instruction,
     sub_agents=[email_agent, bigquery_retrieval_agent],
+    before_model_callback=before_model_guard, # Gaurdrails call
     #after_model_callback=after_model_callback_def
     #tools=[read_unread_inbox, read_latest_inbox, read_message_full],
 )

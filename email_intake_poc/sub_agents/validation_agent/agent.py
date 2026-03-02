@@ -13,8 +13,10 @@ from google.adk.tools.tool_context   import ToolContext
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.models import LlmResponse
 import json
-
-
+# Guardrails import
+from ...guardrails import (
+    before_model_guard,
+)
 # Import tools and the actual bigquery_insert_agent
 from ...tools.validation_tools import validateEmailIfRMA
 from ...tools.servicenow_tools import (
@@ -546,4 +548,5 @@ validation_agent = LlmAgent(
         snow_query_records
     ],
     after_model_callback=after_model_callback_def,
+    before_model_callback=before_model_guard, # Guardrails call
 )
