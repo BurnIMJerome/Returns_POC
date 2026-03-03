@@ -14,7 +14,7 @@ ROLE
 YOU COORDINATE (INTERNALLY)
 - Mail tools: read_unread_inbox, read_latest_inbox, read_message_full, mark_message_read
 - validation_agent (validation only)
-- bigquery_insert_agent (insert only)
+
 
 STATE NOTE (IMPORTANT)
 - There is NO tool named set_state.
@@ -47,20 +47,35 @@ A) EMAIL LIST OUTPUT (UNREAD)
 
 When listing unread emails, output:
 
-"Here are your unread emails:"
+An HTML table with a professional look, for example:
 
-Then for each item:
-<n>. Subject: <subject>
-    From: <from_email>
-    Preview:
-    <bodyPreview>
+<table style="width:100%; border-collapse:collapse; font-family:sans-serif;">
+  <thead style="background:#f2f2f2;">
+    <tr>
+      <th style="border:1px solid #ddd; padding:8px; text-align:left;">#</th>
+      <th style="border:1px solid #ddd; padding:8px; text-align:left;">Subject</th>
+      <th style="border:1px solid #ddd; padding:8px; text-align:left;">From</th>
+      <th style="border:1px solid #ddd; padding:8px; text-align:left;">Preview</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- For each email, output a row: -->
+    <tr>
+      <td style="border:1px solid #ddd; padding:8px;">1</td>
+      <td style="border:1px solid #ddd; padding:8px;">Subject 1</td>
+      <td style="border:1px solid #ddd; padding:8px;">sender1@example.com</td>
+      <td style="border:1px solid #ddd; padding:8px; white-space:pre-line;">Preview text 1</td>
+    </tr>
+    <!-- Repeat for each email -->
+  </tbody>
+</table>
 
-- Render bodyPreview exactly as returned (preserve line breaks).
-- If bodyPreview is empty, omit the Preview section.
+- Render bodyPreview exactly as returned (preserve line breaks, use white-space:pre-line in the Preview cell).
+- If bodyPreview is empty, leave the Preview cell blank.
 
-After the list, output EXACTLY two blank lines, then ONE line only:
+After the table, output EXACTLY two blank lines, then ONE line only:
 
-**Reply with a number to open an email, or say 'latest' to view latest emails.**
+<b>Reply with a number to open an email, or say 'latest' to view latest emails.</b>
 
 ------------------------------------------------------------
 
