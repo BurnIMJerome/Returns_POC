@@ -1,47 +1,55 @@
 from google.adk.agents import LlmAgent
+from google.adk.tools.agent_tool import AgentTool
 from .sub_agents.email_agent.agent import email_agent
-from .sub_agents.bigquery_agent.agent import bigquery_agent
-from .tools.email_tools import (
-    read_message_full,
+from .sub_agents.bigquery_insert_agent.agent import bigquery_insert_agent
+from .sub_agents.bigquery_retrieval_agent.agent import bigquery_retrieval_agent
+from .instruction import main_agent_instruction
+from .config import settings
+from google.adk.models import LlmResponse
+import copy 
+from typing import Dict, Optional, Literal, Union, Any
+from google.adk.agents.callback_context import CallbackContext
+from google.adk.models import LlmResponse
+# Guardrails import
+from .guardrails import (
+    before_model_guard,
 )
+
+def after_model_callback_def(callback_context: CallbackContext, llm_response: LlmResponse
+) -> Optional[LlmResponse]:
+    """
+    After the model produces output, this callback just save the response in state.
+    """
+       # Validate structure safely
+    if (
+        not llm_response
+        or not llm_response.content
+        or not llm_response.content.parts
+        or len(llm_response.content.parts) == 0
+        or not hasattr(llm_response.content.parts[0], "text")
+        or not llm_response.content.parts[0].text
+        or not llm_response.content.parts[0].text.strip()
+    ):
+         print("\n[AFTER MODEL] LLM response is empty or malformed. No modifications.")
+         return llm_response
+    
+    modified_llm_response = copy.deepcopy(llm_response)
+
+    # Assuming the main text is in the first part
+    original_text = modified_llm_response.content.parts[0].text
+    current_text = original_text  # Start with original for modification
+
+    print(f"\n[AFTER MODEL] Original LLM response: '{original_text}'")
+    callback_context.state["main_agent_response"] = original_text
+    
+    return None
 
 root_agent = LlmAgent(
     name="main_agent",
-    model="gemini-2.5-flash",
-   instruction="""
-You are the orchestrator.
-
-You maintain two distinct context objects:
-- email_list: list of email summaries from email_agent (numbered 1..N with internal message_id)
-- selected_email: a SINGLE full email object (subject, from, sent_datetime, body, message_id)
-
-Routing Rules:
-
-1) If user asks to list emails:
-   → Call email_agent.
-   → Ensure the result is stored in email_list.
-   → Display the numbered list to the user.
-
-2) If user asks to read/open/view a specific email (e.g., "open 1"):
-   → Use email_list to resolve the user's selection (N) to message_id.
-   → Call read_message_full(message_id).
-   → Save the tool result as selected_email (SINGLE object).
-   → Output the full email content to the user.
-   → Do NOT call bigquery_agent.
-
-3) If user says "process N":
-   → Use email_list to resolve selection (N) to message_id.
-   → Call read_message_full(message_id).
-   → Save the tool result as selected_email (SINGLE object).
-   → Call bigquery_agent using ONLY selected_email (NOT the full email_list).
-   → Do not print the full email body unless the user asked to view it.
-
-Hard Rules:
-- Never pass email_list to bigquery_agent.
-- bigquery_agent must receive only selected_email (single full email), not a batch.
-- "process N" implies extraction + insert; "open/read/view N" implies display only.
-""",
-
-    tools=[read_message_full],  
-    sub_agents=[email_agent, bigquery_agent],
+    model=settings.GOOGLE_MODEL,
+    instruction=main_agent_instruction,
+    sub_agents=[email_agent, bigquery_retrieval_agent],
+    before_model_callback=before_model_guard, # Gaurdrails call
+    #after_model_callback=after_model_callback_def
+    #tools=[read_unread_inbox, read_latest_inbox, read_message_full],
 )
