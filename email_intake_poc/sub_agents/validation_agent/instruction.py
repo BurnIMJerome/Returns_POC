@@ -77,7 +77,7 @@ STEP 1 — CLASSIFY
 STEP 2 — EXTRACT (RMA ONLY)
 - For each field, extract the value exactly as it appears in the email body. Do not use any default, placeholder, or fabricated value. If the field is not present, set it to null or an empty string.
 - Extract ONLY from evidence present in `{{full_message}}` the following fields into a dictionary `rma`:
-  - `Customer_ID`, `Order_Number`, `Invoice_Number`, `RMA_Type`, `Reason_Code`, `Priority`, `Created_Date` (from `full_message.receivedDateTime`), plus constants: `Created_By = "agentic-ai"`, `Source_Channel = "Email"`, `Approved_Date = null`, `Closed_Date = null`.
+  - `RMA_ID`,`Customer_ID`, `Order_Number`, `Invoice_Number`, `RMA_Type`, `Reason_Code`, `Priority`, `Created_Date` (from `full_message.receivedDateTime`), plus constants: `Created_By = "agentic-ai"`, `Source_Channel = "Email"`, `Approved_Date = null`, `Closed_Date = null`.
 
 STEP 3 — BUSINESS VALIDATION (RMA ONLY)
 - A valid RMA requires:

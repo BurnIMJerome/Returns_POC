@@ -451,7 +451,7 @@ HTML = """
   <div class="wrap">
     <div class="topbar">
       <div class="brand">
-  <img src="/static/ingram_logo.png" class="logo-img" alt="Ingram Micro Logo" onerror="this.onerror=null;this.src='https://upload.wikimedia.org/wikipedia/commons/2/2b/Ingram_Micro_logo.svg';">
+  <img src="/static/ingram_logo.png" class="logo-img" alt="Ingram Micro Logo">
         <div class="title">
           <h1>Ingram Micro</h1>
           <span>RMA Agent • Internal Demo</span>
@@ -541,7 +541,12 @@ function addMsg(role, text, meta){
 
   const bubble = document.createElement("div");
   bubble.className = "bubble " + (role === "me" ? "me" : "bot");
-  bubble.textContent = text;
+  // Always render bot messages as HTML to support all output formats (tables, divs, etc)
+  if (role === "bot") {
+    bubble.innerHTML = text;
+  } else {
+    bubble.textContent = text;
+  }
 
   const m = document.createElement("div");
   m.className = "meta";
@@ -688,7 +693,7 @@ async function send(){
   }
 }
 
-addMsg("bot", "Hi! I’m Rise. Ask me anything, and I’ll respond using your ADK agent.", "Welcome");
+addMsg("bot", "Hi! I’m IRA. Ask me anything, and I’ll respond using your ADK agent.", "Welcome");
 </script>
 </body>
 </html>
