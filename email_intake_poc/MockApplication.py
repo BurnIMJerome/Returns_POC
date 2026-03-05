@@ -368,7 +368,7 @@ def home():
             <table id="rmaTable">
               <thead>
                 <tr>
-                  <th style="width:42%;">RMA_ID</th>
+                  <th style="width:42%;">Order_Number</th>
                   <th style="width:28%;">Status</th>
                   <th style="width:30%;">Customer_ID</th>
                 </tr>
@@ -536,7 +536,7 @@ def home():
       records.forEach((rec) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${esc(rec.RMA_ID)}</td>
+          <td>${esc(rec.Order_Number)}</td>
           <td>${esc(rec.Status)}</td>
           <td>${esc(rec.Customer_ID)}</td>
         `;
@@ -549,7 +549,7 @@ def home():
       const q = (document.getElementById('filterBox').value || '').toLowerCase().trim();
       if (!q) return renderTable(__allRecords);
       const filtered = __allRecords.filter(r => {
-        const blob = `${r.RMA_ID||''} ${r.Customer_ID||''} ${r.Status||''}`.toLowerCase();
+        const blob = `${r.Order_Number||''} ${r.Customer_ID||''} ${r.Status||''}`.toLowerCase();
         return blob.includes(q);
       });
       renderTable(filtered);
