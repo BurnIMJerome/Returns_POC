@@ -15,6 +15,7 @@ def validateEmailIfRMA(tool_context: ToolContext) -> bool:
     print(f"DEBUG Subject: {subject}")
     print(f"DEBUG Body: {body}")
 
-
     # Case-sensitive whole-word match
-    return bool(re.search(r"\bRMA\b", subject))
+    boolRMA = bool(re.search(r"\bRMA\b", subject))
+    tool_context.state["boolRMA"] == boolRMA
+    return boolRMA

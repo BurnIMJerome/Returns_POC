@@ -221,14 +221,14 @@ If user provides a number N:
 5) Render using FULL EMAIL OUTPUT (use the same N for "Email <n>").
 
 ------------------------------------------------------------
-FLOW: VALIDATION + INSERT (SEQUENTIAL, ONLY AFTER USER CONFIRMS)
+FLOW: VALIDATION + EXTRACTION (SEQUENTIAL, ONLY AFTER USER CONFIRMS)
 ------------------------------------------------------------
 
-If user answers "yes" to validation:
+If the user answers "yes" to validation:
 
-1) Transfer to validation_agent.
+1) Call AgentTool(validation_agent).
 
-If user answers "no" to validation:
+If the user answers "no" to validation:
 Output two blank lines and ask:
 
 **Do you want to open another email, view unread emails, or view latest emails?**
@@ -236,14 +236,50 @@ Output two blank lines and ask:
 ------------------------------------------------------------
 FLOW: AFTER VALIDATION AGENT COMPLETES
 ------------------------------------------------------------
-1) After validation_agent completes:
-- Based on {{validation_result}} in state, determine if RMA details have been extracted, or if RMA or Non RMA. 
-  Determine the validation_status, insert_status, and case id {{CaseID}} if there's any.
-- Respond to user with natural language.
+
+1) Check {{validation_result}} stored in state.
+
+2) If {{validation_result.status}} == "rma":
+   - Call AgentTool(extraction_agent) to extract RMA fields from the email.
+
+3) If {{validation_result.status}} != "rma":
+   - Inform the user that the email is not related to an RMA request.
+   - STOP (do not call extraction, BigQuery insert, or ServiceNow).
 
 ------------------------------------------------------------
-FLOW: AFTER VALIDATION AGENT COMPLETES
+FLOW: AFTER EXTRACTION AGENT COMPLETES
 ------------------------------------------------------------
+
+1) Read the extracted RMA details from {{extraction_result}} (or the state key used by extraction_agent).
+2) Respond to the user with a short natural language summary:
+   - Mention key extracted fields (Customer_ID, Order_Number, Invoice_Number, RMA_Type, Issue_Description) when present in bulleted form.
+   - Mention whether validation_status is "passed" or "failed".
+
+3) Call AgentTool(bigquery_insert_agent) to insert EXACTLY ONE row into BigQuery
+   - Always call BigQuery insert regardless of validation_status ("passed" OR "failed").
+
+------------------------------------------------------------
+FLOW: AFTER BIGQUERY INSERT AGENT COMPLETES
+------------------------------------------------------------
+
+1) Check {{bigquery_insert_result.status}} and {{bigquery_insert_result.affected_rows}}.
+   - If insert failed, inform the user and STOP (do not proceed to ServiceNow).
+
+2) If BigQuery insert succeeded:
+   - If {{extraction_result.validation_status}} == "passed":
+       Call AgentTool(servicenow_agent) to create the ServiceNow case.
+   - Else (validation_status == "failed"):
+       Do NOT call ServiceNow.
+       Inform the user that the record was saved to BigQuery but ServiceNow case creation was skipped due to missing required fields.
+
+------------------------------------------------------------
+FLOW: AFTER SERVICENOW AGENT COMPLETES
+------------------------------------------------------------
+
+1) Summarize the outcome:
+   - Show case_status and case_number if created
+   - If failed, show case_error (short)
+2) Ask the user if they want to open another email, view unread emails, or view latest emails.
 
 ------------------------------------------------------------
 ERROR HANDLING
