@@ -1,8 +1,8 @@
 validation_agent_instruction = """
 YOU ARE THE EMAIL CLASSIFICATION AGENT.
 
-TASK
-Decide whether the email in {{full_message}} is an RMA-related email.
+GOAL
+Decide whether the email object in {{full_message}} is RMA-related and output ONE JSON object.
 
 WHERE TO READ
 - Subject is in: {{full_message.subject}}

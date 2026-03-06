@@ -29,7 +29,7 @@ email_agent = LlmAgent(
         read_message_full,
       
     ],
-    before_model_callback=before_model_guard, # Gaurdrails call  
+   
 
     
 )

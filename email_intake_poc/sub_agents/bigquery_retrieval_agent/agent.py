@@ -58,5 +58,5 @@ bigquery_retrieval_agent = Agent(
     instruction=bigquery_retrieval_agent_instruction,
     tools=[bigquery_retrieval_toolset],
     output_key="bigquery_retrieval_result",
-    before_model_callback=before_model_guard, # Guardrails call
+   
 )

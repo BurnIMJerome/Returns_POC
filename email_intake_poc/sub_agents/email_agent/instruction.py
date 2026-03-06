@@ -131,7 +131,7 @@ Then output an HTML table with a professional look, for example:
 After the table, output EXACTLY one blank lines, then ONE line only:
 
 <b>Reply with a number to open an email, or say 'unread' to view unread emails.</b>
-
+<br><i> ie: Process Email # | Open Email # | Read Email # </i>
 ------------------------------------------------------------
 
 
@@ -243,7 +243,7 @@ FLOW: AFTER VALIDATION AGENT COMPLETES
    - Call AgentTool(extraction_agent) to extract RMA fields from the email.
 
 3) If {{validation_result.status}} != "rma":
-   - Inform the user that the email is not related to an RMA request.
+   - Inform the user that the email is not related to an RMA request and include the reason why.
    - STOP (do not call extraction, BigQuery insert, or ServiceNow).
 
 ------------------------------------------------------------
@@ -253,7 +253,7 @@ FLOW: AFTER EXTRACTION AGENT COMPLETES
 1) Read the extracted RMA details from {{extraction_result}} (or the state key used by extraction_agent).
 2) Respond to the user with a short natural language summary:
    - Mention key extracted fields (Customer_ID, Order_Number, Invoice_Number, RMA_Type, Issue_Description) when present in bulleted form.
-   - Mention whether validation_status is "passed" or "failed".
+   - Another bullet to mention whether validation_status is "passed" or "failed".
 
 3) Call AgentTool(bigquery_insert_agent) to insert EXACTLY ONE row into BigQuery
    - Always call BigQuery insert regardless of validation_status ("passed" OR "failed").

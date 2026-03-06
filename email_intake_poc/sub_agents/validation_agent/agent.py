@@ -96,6 +96,6 @@ validation_agent = LlmAgent(
     output_schema= ValidationOutput,
     instruction=validation_agent_instruction,
     after_model_callback=after_model_callback_def,
-    before_model_callback=before_model_guard, 
+
     
 )

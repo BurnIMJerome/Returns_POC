@@ -152,9 +152,14 @@ def after_model_callback_def(
 
     if parsed is not None:
         callback_context.state["extraction_result"] = parsed
+        callback_context.state["extraction_result_json"] = json.dumps(
+            parsed,
+            ensure_ascii=False
+        )
     else:
         # fallback: keep raw string in the same key if you prefer
         callback_context.state["extraction_result"] = original_text
+        callback_context.state["extraction_result_json"] = "{}"
 
     return llm_response
 
@@ -167,6 +172,6 @@ extraction_agent = LlmAgent(
     output_schema=RMAOutput,
     instruction=extraction_agent_instruction,
     after_model_callback=after_model_callback_def,
-    before_model_callback=before_model_guard, 
+  
     
 )

@@ -148,3 +148,4 @@ def snow_delete_record(
     )
     _raise_for_status_with_body(resp)
     return {"status": "deleted", "table": table, "sys_id": sys_id}
+
