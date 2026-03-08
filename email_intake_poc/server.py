@@ -7,12 +7,11 @@ from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai.types import Content, Part
 
-from .agent import root_agent  
+from .agent import root_agent
 
 APP_NAME = "SampleUI"
 USER_ID = "web_user"
@@ -32,8 +31,6 @@ app.add_middleware(
 session_service = InMemorySessionService()
 runner = Runner(app_name=APP_NAME, agent=root_agent, session_service=session_service)
 
-# Simple UI
-
 HTML = """
 <!doctype html>
 <html>
@@ -44,53 +41,50 @@ HTML = """
 
 <style>
   :root{
-    --ingram-blue: #0071ce;
-    --ingram-light-blue: #e6f0fa;
-    --ingram-dark-blue: #003b70;
-    --bg: var(--ingram-light-blue);
-    --panel: #fff;
-    --panel2: #f4f8fb;
-    --border: #0071ce;
-    --text: #003b70;
-    --muted: #5a7ca7;
-    --accent: #0071ce;
-    --good: #34d399;
-    --warn: #fbbf24;
-    --bad: #fb7185;
-    --shadow: 0 12px 30px rgba(0,113,206,.10);
+    --ingram-blue: #0071CE;
+    --ingram-dark-blue: #003A8F;
+    --ingram-light-blue: #E6F2FB;
+    --ingram-accent: #00A3E0;
+
+    --bg: #E6F2FB;
+    --panel: #FFFFFF;
+    --panel2: #F4F9FF;
+
+    --border: #0071CE;
+    --text: #003A8F;
+    --muted: #6B8DB5;
+
+    --good: #22C55E;
+    --warn: #F59E0B;
+    --bad: #EF4444;
+
+    --shadow: 0 10px 25px rgba(0,113,206,.12);
   }
 
   *{ box-sizing:border-box; }
+
   body{
     margin:0;
     font-family: 'Segoe UI', Arial, sans-serif;
     background: var(--bg);
-    color:#fff;
+    color: var(--text);
   }
-
 
   .wrap{
     max-width: 980px;
     margin: 0 auto;
     padding: 22px 16px 28px;
-    background: var(--panel);
-    border-radius: 18px;
-    box-shadow: var(--shadow);
-    border: 2px solid var(--border);
-    color: #fff;
   }
-
 
   .topbar{
     display:flex;
     align-items:center;
     justify-content:space-between;
     gap:12px;
-    margin-bottom:14px;
+    margin-bottom:18px;
     border-bottom: 2px solid var(--border);
-    padding-bottom: 10px;
+    padding-bottom: 12px;
   }
-
 
   .brand{
     display:flex;
@@ -98,18 +92,14 @@ HTML = """
     gap:12px;
   }
 
-
   .logo-img{
-    width:60px;
-    height:60px;
+    width:76px;
+    height:76px;
     object-fit:contain;
-    border-radius:10px;
+    border-radius:12px;
     display:block;
     flex-shrink:0;
-    margin:0;
     background: #fff;
-    border: 2px solid var(--border);
-    box-shadow: 0 2px 8px rgba(0,113,206,.08);
   }
 
   .title{
@@ -123,48 +113,54 @@ HTML = """
     margin:0;
     font-weight:800;
     letter-spacing:.2px;
-    color: var(--accent);
+    color: var(--ingram-blue);
     text-transform: uppercase;
   }
+
   .title span{
     font-size:13px;
-    color:var(--muted);
-    font-weight: 500;
+    color: var(--muted);
+    font-weight: 600;
   }
 
   .pill{
     display:flex;
     align-items:center;
     gap:8px;
-    padding:10px 12px;
-    border:1px solid var(--border);
-    background: rgba(15,23,42,.6);
+    padding:10px 16px;
+    border:1px solid var(--ingram-blue);
+    background: #FFFFFF;
     border-radius: 999px;
-    box-shadow: 0 6px 18px rgba(0,0,0,.20);
-    font-size:12px;
-    color:#fff;
+    box-shadow: var(--shadow);
+    font-size:14px;
+    color: var(--text);
     user-select:none;
+    font-weight: 700;
   }
+
   #connText {
-    color: #fff !important;
-    font-weight: bold;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.18);
-    letter-spacing: 0.5px;
+    color: var(--text);
+    font-weight: 700;
+    letter-spacing: 0.2px;
   }
+
   .dot{
-    width:8px; height:8px; border-radius:999px;
+    width:10px;
+    height:10px;
+    border-radius:999px;
     background: var(--good);
-    box-shadow: 0 0 12px rgba(52,211,153,.55);
+    box-shadow: 0 0 8px rgba(34,197,94,.35);
   }
+
   .dot.off{
-    background:#64748b;
+    background:#94A3B8;
     box-shadow:none;
   }
 
   .card{
-    border:1px solid var(--border);
-    background: linear-gradient(180deg, rgba(15,23,42,.75), rgba(11,18,32,.75));
-    border-radius: 20px;
+    border: 2px solid var(--border);
+    background: var(--panel);
+    border-radius: 22px;
     box-shadow: var(--shadow);
     overflow:hidden;
   }
@@ -174,165 +170,149 @@ HTML = """
     align-items:center;
     justify-content:space-between;
     gap:10px;
-    padding: 12px 14px;
-    border-bottom: 1px solid rgba(31,42,68,.7);
-    background: rgba(15,23,42,.35);
+    padding: 16px 18px;
+    border-bottom: 1px solid #D7E8F8;
+    background: var(--ingram-dark-blue);
   }
+
   .status-left{
-    display:flex; align-items:center; gap:10px;
+    display:flex;
+    align-items:center;
+    gap:10px;
     min-width: 0;
   }
+
   .spinner{
-    width:18px; height:18px;
-    border:2px solid rgba(159,176,199,.25);
-    border-top-color: rgba(96,165,250,.95);
+    width:18px;
+    height:18px;
+    border:2px solid rgba(255,255,255,.25);
+    border-top-color: #FFFFFF;
     border-radius: 999px;
     animation: spin .9s linear infinite;
     display:none;
   }
+
   @keyframes spin { to { transform: rotate(360deg);} }
 
   .status-text{
-    font-size:12px;
-    color: #fff !important;
-    font-weight: bold;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.18);
+    font-size:14px;
+    color: #FFFFFF;
+    font-weight: 700;
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
   }
 
   .actions{
-    display:flex; gap:8px;
+    display:flex;
+    gap:10px;
   }
+
   .ghost{
-    border:1px solid rgba(31,42,68,.9);
-    background: rgba(11,18,32,.35);
-    color: #fff !important;
-    font-weight: bold;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.18);
-    padding:8px 10px;
-    border-radius: 12px;
+    border:1px solid rgba(255,255,255,.22);
+    background: rgba(255,255,255,.08);
+    color: #FFFFFF;
+    font-weight: 700;
+    padding:10px 16px;
+    border-radius: 14px;
     cursor:pointer;
-    font-size:12px;
+    font-size:14px;
     transition: transform .08s ease, background .15s ease;
   }
-  .ghost:hover{ background: rgba(11,18,32,.6); }
+
+  .ghost:hover{ background: rgba(255,255,255,.16); }
   .ghost:active{ transform: translateY(1px); }
 
- .chat{
-  height: 62vh;
-  overflow:auto;
-  padding: 14px;
-  scroll-behavior:smooth;
+  .chat{
+    height: 62vh;
+    overflow:auto;
+    padding: 18px;
+    scroll-behavior:smooth;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, #F4F9FF 0%, #EEF6FD 100%);
+  }
 
-  display: flex;              /* NEW */
-  flex-direction: column;     /* NEW */
-}
+  .msg{
+    display:flex;
+    gap:10px;
+    margin: 12px 0;
+    opacity:0;
+    transform: translateY(6px);
+    animation: pop .18s ease forwards;
+    width: fit-content;
+    max-width: 100%;
+  }
 
-.msg{
-  display:flex;
-  gap:10px;
-  margin: 12px 0;
-  opacity:0;
-  transform: translateY(6px);
-  animation: pop .18s ease forwards;
+  .msg.bot{
+    align-self: flex-start;
+    margin-right:auto;
+  }
 
-  width: fit-content;         /* key: message wraps content */
-  max-width: 100%;            /* don’t overflow */
-}
+  .msg.me{
+    align-self: flex-end;
+    margin-left:auto;
+    flex-direction: row-reverse;
+  }
 
-  /* Bot on the left */
-.msg.bot{
-   align-self: flex-start;     /* key */    
-}
-
-/* User on the right */
-.msg.me{
- align-self: flex-end;       /* key */
-  flex-direction: row-reverse;/* avatar on the right */
-}
-
-.msg.me .bubble{
-  background:#dbeafe;
-  border-color:#93c5fd;
-  color:#0f172a;
-}
   @keyframes pop {
     to { opacity:1; transform: translateY(0); }
   }
 
-  /* LEFT (bot) */
-  .msg.bot{
-    justify-content:flex-start;
-  }
-
-  /* RIGHT (user) */
-  .msg.me{
-    justify-content:flex-end;
-    flex-direction: row-reverse;
-  }
-
- .msg.me .bubble{
-  margin-left:auto;
-  text-align:left;
-  background:#dbeafe;
-  border-color:#93c5fd;
-  color:#0f172a;            /* <-- IMPORTANT (text visible on light bg) */
-}
-.msg.me{
-  margin-left:auto;         /* <-- forces the whole row to the right */
-  flex-direction: row-reverse;
-}
-
-.msg.bot{
-  margin-right:auto;        /* keeps bot on the left */
-}
-
-  .msg.bot .bubble{
-    margin-right:auto;
-  }
-
   .avatar{
-    width:34px; height:34px;
-    border-radius: 14px;
+    width:40px;
+    height:40px;
+    border-radius: 16px;
     display:flex;
     align-items:center;
     justify-content:center;
     font-weight:700;
     font-size:12px;
     flex: 0 0 auto;
-    border:1px solid rgba(31,42,68,.85);
-    background: rgba(11,18,32,.55);
-    color: var(--muted);
+    border:1px solid #CFE3F7;
+    background: #FFFFFF;
+    color: var(--ingram-blue);
   }
+
   .avatar.me{
-    background: rgba(96,165,250,.16);
-    color: #cfe6ff;
+    background: var(--ingram-blue);
+    color: #FFFFFF;
+    border-color: var(--ingram-blue);
   }
+
   .avatar.bot{
-    background: rgba(52,211,153,.14);
-    color: #c9ffea;
+    background: #E8F4FD;
+    color: var(--ingram-dark-blue);
   }
 
   .bubble{
     max-width: 74%;
-    border:1px solid rgba(31,42,68,.9);
-    background: rgba(11,18,32,.55);
-    padding: 12px 12px;
-    border-radius: 16px;
-    line-height:1.45;
+    border:1px solid #D6E7F8;
+    padding: 14px 14px;
+    border-radius: 18px;
+    line-height:1.5;
     font-size: 14px;
     white-space: pre-wrap;
+    box-shadow: 0 4px 10px rgba(0,113,206,.06);
   }
+
   .bubble.bot{
-    background: rgba(15,23,42,.55);
+    background: #FFFFFF;
+    color: var(--text);
+  }
+
+  .msg.me .bubble{
+    margin-left:auto;
+    text-align:left;
+    background:#D9ECFF;
+    border-color:#A5D3FF;
+    color:#003A8F;
   }
 
   .meta{
     margin-top:6px;
     font-size: 11px;
-    color: rgba(159,176,199,.85);
+    color: #7A95B8;
   }
 
   .typing{
@@ -340,65 +320,77 @@ HTML = """
     align-items:center;
     gap:6px;
   }
+
   .dots{
     display:inline-flex;
     gap:4px;
     align-items:center;
     height: 14px;
   }
+
   .dots span{
-    width:6px; height:6px; border-radius:999px;
-    background: rgba(159,176,199,.85);
+    width:6px;
+    height:6px;
+    border-radius:999px;
+    background: #7A95B8;
     animation: bounce 1s infinite;
   }
+
   .dots span:nth-child(2){ animation-delay: .12s; }
   .dots span:nth-child(3){ animation-delay: .24s; }
+
   @keyframes bounce{
     0%, 60%, 100%{ transform: translateY(0); opacity:.55; }
     30%{ transform: translateY(-4px); opacity:1; }
   }
 
   .composer{
-    border-top: 1px solid rgba(31,42,68,.7);
-    padding: 12px 14px 14px;
-    background: rgba(15,23,42,.35);
+    border-top: 1px solid #D7E8F8;
+    padding: 14px 18px 16px;
+    background: #F7FBFF;
   }
+
   .row{
     display:flex;
     gap:10px;
     align-items:flex-end;
   }
+
   textarea{
     width:100%;
     resize:none;
-    min-height: 44px;
+    min-height: 50px;
     max-height: 160px;
-    padding: 12px 12px;
-    border-radius: 14px;
-    border: 1px solid rgba(31,42,68,.95);
-    background: rgba(11,18,32,.55);
-    color: #fff;
+    padding: 14px 14px;
+    border-radius: 16px;
+    border: 1px solid #CFE3F7;
+    background: #FFFFFF;
+    color: var(--text);
     outline:none;
     font-size: 14px;
-    line-height: 1.35;
+    line-height: 1.4;
   }
+
   textarea:focus{
-    border-color: rgba(96,165,250,.55);
-    box-shadow: 0 0 0 3px rgba(96,165,250,.15);
+    border-color: var(--ingram-blue);
+    box-shadow: 0 0 0 3px rgba(0,113,206,.12);
   }
+
   .send{
-    padding: 12px 14px;
-    border-radius: 14px;
-    border: 1px solid rgba(96,165,250,.55);
-    background: rgba(96,165,250,.22);
-    color: #d9ecff;
+    padding: 14px 18px;
+    border-radius: 16px;
+    border: 1px solid var(--ingram-blue);
+    background: var(--ingram-blue);
+    color: #FFFFFF;
     cursor:pointer;
-    font-weight: 650;
+    font-weight: 700;
     transition: transform .08s ease, background .15s ease;
     white-space:nowrap;
   }
-  .send:hover{ background: rgba(96,165,250,.30); }
+
+  .send:hover{ background: #005FB2; }
   .send:active{ transform: translateY(1px); }
+
   .send:disabled{
     cursor:not-allowed;
     opacity:.55;
@@ -407,21 +399,22 @@ HTML = """
   .hint{
     margin-top: 10px;
     font-size: 12px;
-    color: rgba(159,176,199,.85);
+    color: #6B8DB5;
     display:flex;
     justify-content:space-between;
     gap:10px;
     flex-wrap:wrap;
   }
+
   .kbd{
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono";
     font-size: 11px;
     padding: 2px 6px;
-    border: 1px solid rgba(31,42,68,.9);
-    border-bottom-color: rgba(31,42,68,.55);
+    border: 1px solid #CFE3F7;
+    border-bottom-color: #B7D6F4;
     border-radius: 8px;
-    background: rgba(11,18,32,.55);
-    color: rgba(207,230,255,.9);
+    background: #FFFFFF;
+    color: var(--text);
   }
 
   .toast{
@@ -431,15 +424,16 @@ HTML = """
     transform: translateX(-50%);
     padding: 10px 12px;
     border-radius: 12px;
-    border: 1px solid rgba(31,42,68,.9);
-    background: rgba(15,23,42,.85);
-    color: rgba(231,238,248,.95);
+    border: 1px solid #CFE3F7;
+    background: #FFFFFF;
+    color: var(--text);
     font-size: 12px;
     box-shadow: var(--shadow);
     opacity:0;
     pointer-events:none;
     transition: opacity .18s ease, transform .18s ease;
   }
+
   .toast.show{
     opacity:1;
     transform: translateX(-50%) translateY(-4px);
@@ -451,13 +445,13 @@ HTML = """
   <div class="wrap">
     <div class="topbar">
       <div class="brand">
-  <img src="/static/ingram_logo.png" class="logo-img" alt="Ingram Micro Logo">
+        <img src="/static/ingram_logo.png" class="logo-img" alt="Ingram Micro Logo">
         <div class="title">
           <h1>Ingram Micro</h1>
           <span>RMA Agent • Internal Demo</span>
         </div>
       </div>
-python -m email_intake_poc.server
+
       <div class="pill" id="connPill" title="Backend connection">
         <span class="dot" id="connDot"></span>
         <span id="connText">Ready</span>
@@ -480,7 +474,7 @@ python -m email_intake_poc.server
 
       <div class="composer">
         <div class="row">
-          <textarea id="msg" placeholder="Ask something… (e.g., “Summarize today’s agenda.”)"></textarea>
+          <textarea id="msg" placeholder="Ask something… (View unread emails, view items needing validation, view reports, or validate an RMA request)"></textarea>
           <button class="send" id="sendBtn" onclick="send()">Send</button>
         </div>
         <div class="hint">
@@ -541,7 +535,7 @@ function addMsg(role, text, meta){
 
   const bubble = document.createElement("div");
   bubble.className = "bubble " + (role === "me" ? "me" : "bot");
-  // Always render bot messages as HTML to support all output formats (tables, divs, etc)
+
   if (role === "bot") {
     bubble.innerHTML = text;
   } else {
@@ -565,7 +559,6 @@ function addMsg(role, text, meta){
 }
 
 function addTyping(){
-
   const row = document.createElement("div");
   row.className = "msg bot";
 
@@ -580,7 +573,7 @@ function addTyping(){
   const typing = document.createElement("div");
   typing.className = "typing";
   typing.innerHTML = `
-    <span style="color: rgba(159,176,199,.95)">Thinking</span>
+    <span style="color:#6B8DB5">Thinking</span>
     <span class="dots"><span></span><span></span><span></span></span>
   `;
 
@@ -646,6 +639,7 @@ async function send(){
     "Running tools (if needed)…",
     "Generating response…"
   ];
+
   let i = 0;
   const stepTimer = setInterval(()=>{
     statusText.textContent = steps[i % steps.length];
@@ -663,9 +657,9 @@ async function send(){
 
     if(!r.ok){
       typingRow.remove();
-      addMsg("bot", `Error ${r.status}\n${raw}` , `Welcome • ${nowTime()}`);
+      addMsg("bot", `Error ${r.status}<br>${raw}`, `System • ${nowTime()}`);
       setConn(false, "Error");
-      setBusy(false, "Idle"); // Ensure Send button is re-enabled after error
+      setBusy(false, "Idle");
       return;
     }
 
@@ -683,9 +677,9 @@ async function send(){
   }
   catch(e){
     typingRow.remove();
-    addMsg("bot", "Fetch error: " + e, `Welcome • ${nowTime()}`);
+    addMsg("bot", "Fetch error: " + e, `System • ${nowTime()}`);
     setConn(false, "Offline");
-    setBusy(false, "Idle"); // Ensure Send button is re-enabled after error
+    setBusy(false, "Idle");
   }
   finally{
     clearInterval(stepTimer);
@@ -693,12 +687,15 @@ async function send(){
   }
 }
 
-addMsg("bot", "Hi! I’m IRA. Ask me anything, and I’ll respond using your ADK agent.", "Welcome");
+addMsg(
+  "bot",
+  "Hi! I'm IRA, your Intelligent Returns Agent Assistant. I can help you review incoming emails, validate RMA requests, and create support cases.",
+  "Welcome"
+);
 </script>
 </body>
 </html>
 """
-
 
 @app.get("/", response_class=HTMLResponse)
 def home():
@@ -712,7 +709,6 @@ async def chat(payload: dict):
     requested_session_id = payload.get("session_id", "demo_session")
     message = payload.get("message", "")
 
-    # 1) Get or create session (ASYNC in your ADK version)
     try:
         session = await session_service.get_session(
             app_name=APP_NAME,
@@ -724,21 +720,18 @@ async def chat(payload: dict):
         session = await session_service.create_session(
             app_name=APP_NAME,
             user_id=USER_ID,
-            state={},                 # <- important
-            session_id=requested_session_id,  # if your version ignores this, we'll still use session.id
+            state={},
+            session_id=requested_session_id,
         )
         print("SESSION CREATED:", session.id)
 
-    # 2) Always use the actual session.id from ADK
     actual_session_id = session.id
 
-    # 3) Run agent
     events = runner.run(
         user_id=USER_ID,
         session_id=actual_session_id,
         new_message=Content(role="user", parts=[Part(text=message)]),
     )
-
 
     reply = ""
     for event in events:
@@ -749,14 +742,12 @@ async def chat(payload: dict):
 
     print("REPLY:", reply)
 
-    # If reply is empty, return a clear error message
     if not reply.strip():
         return JSONResponse({
             "reply": "Sorry, the system could not process your request due to a technical issue. Please try again or rephrase your question.",
             "session_id": actual_session_id
         })
 
-    # Return session_id so the browser keeps using the right one next turn
     return JSONResponse({"reply": reply, "session_id": actual_session_id})
 
 

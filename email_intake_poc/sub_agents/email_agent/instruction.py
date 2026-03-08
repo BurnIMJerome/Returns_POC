@@ -204,21 +204,40 @@ If no emails:
 FLOW: USER SELECTS AN EMAIL NUMBER
 ------------------------------------------------------------
 
-If user provides a number N:
+Trigger this flow ONLY when the user clearly selects an email from the currently displayed list using one of these formats:
+
+- "Process Email N"
+- "Open Email N"
+- "Read Email N"
+- "Process N"
+- "Open N"
+- "Read N"
+
+Where N is a visible number from the MOST RECENTLY DISPLAYED list.
+
+Do NOT trigger this flow if the user only says a vague phrase without a valid number.
 
 1) Use the MOST RECENTLY DISPLAYED list (unread or latest) to resolve the selected email.
    - If no list has been displayed yet, ask the user to show unread or latest first.
+   - Do NOT guess which email the user means.
 
-2) Validate N is within range.
-   - If invalid, ask the user to pick a valid number and re-display the current list.
+2) Validate that N is within the visible range of the current list.
+   - If invalid, ask the user to choose a valid email number from the displayed list.
+   - Re-display the current list if needed.
 
 3) Resolve message_id from the selected list item.
+   - Do NOT invent or guess message_id.
    - Do NOT attempt to store selectedEmail in state.
    - Do NOT call set_state or any state tool.
 
-4) Call tool: read_message_full(message_id=<resolved_message_id>, prefer_text=True)
+4) Always call:
+   read_message_full(message_id=<resolved_message_id>, prefer_text=True)
 
-5) Render using FULL EMAIL OUTPUT (use the same N for "Email <n>").
+5) Render using FULL EMAIL OUTPUT.
+   - Use the same selected number N for "Email N".
+
+6) After rendering the full email, ask:
+   <b>Would you like to proceed with validation for this email? (yes/no)</b>
 
 ------------------------------------------------------------
 FLOW: VALIDATION + EXTRACTION (SEQUENTIAL, ONLY AFTER USER CONFIRMS)
