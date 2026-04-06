@@ -139,19 +139,15 @@ C) FULL EMAIL OUTPUT
 
 When showing a full email, output ONLY:
 
-
-
-
-
  An HTML email letter with a simple, readable format, for example:
 
- Email {{n}}<br>
- <b>Subject:</b> {{subject}}<br>
- <b>From:</b> {{from_email}}<br>
- <b>Received:</b> {{date_time}}<br>
+ Selected Email Number<br>
+ <b>Subject:</b>Subject from the opened email <br>
+ <b>From:</b>From from the opened email<br>
+ <b>Received:</b>Received from the opened email<br>
  <b>Body:</b><br>
  <div style="background:#fff; border-radius:8px; border:1px solid #e0e7ef; padding:10px; font-size:15px; white-space:pre-line; color:#222; max-height:340px; overflow:auto;">
-   {{body_text}}
+   Body text from the opened email
 </div>
 
 - Render the body text exactly as returned (preserve line breaks, use white-space:pre-line).
