@@ -1,8 +1,8 @@
 from google.adk.agents import LlmAgent
 from google.adk.tools.agent_tool import AgentTool
-from .sub_agents.email_agent.agent import email_agent
-from .sub_agents.bigquery_insert_agent.agent import bigquery_insert_agent
-from .sub_agents.bigquery_retrieval_agent.agent import bigquery_retrieval_agent
+from email_intake_poc.sub_agents.email_agent.agent import email_agent
+from email_intake_poc.sub_agents.bigquery_insert_agent.agent import bigquery_insert_agent
+from email_intake_poc.sub_agents.bigquery_retrieval_agent.agent import bigquery_retrieval_agent
 from email_intake_poc.tools.rma_tool import submit_rma
 
 from .instruction import main_agent_instruction
@@ -47,7 +47,7 @@ def after_model_callback_def(callback_context: CallbackContext, llm_response: Ll
     return None
 
 root_agent = LlmAgent(
-    name="main_agent",
+    name="email_intake_poc",
     model=settings.GOOGLE_MODEL,tools=[submit_rma] ,
     instruction=main_agent_instruction,
     sub_agents=[email_agent, bigquery_retrieval_agent],
