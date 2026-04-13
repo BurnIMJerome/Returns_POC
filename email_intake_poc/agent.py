@@ -1,27 +1,26 @@
 from google.adk.agents import LlmAgent
 from google.adk.tools.agent_tool import AgentTool
-from email_intake_poc.sub_agents.email_agent.agent import email_agent
-from email_intake_poc.sub_agents.bigquery_insert_agent.agent import bigquery_insert_agent
-from email_intake_poc.sub_agents.bigquery_retrieval_agent.agent import bigquery_retrieval_agent
-from email_intake_poc.tools.rma_tool import submit_rma
+from google.adk.models import LlmResponse
+from google.adk.agents.callback_context import CallbackContext
+from opentelemetry import trace
 
+import copy
+from typing import Optional
+
+from .sub_agents.email_agent.agent import email_agent
+from .sub_agents.bigquery_insert_agent.agent import bigquery_insert_agent
+from .sub_agents.bigquery_retrieval_agent.agent import bigquery_retrieval_agent
+from .tools.rma_tool import submit_rma
 from .instruction import main_agent_instruction
 from .config import settings
-from google.adk.models import LlmResponse
-import copy 
-from typing import Dict, Optional, Literal, Union, Any
-from google.adk.agents.callback_context import CallbackContext
-from google.adk.models import LlmResponse
-# Guardrails import
-from .guardrails import (
-    before_model_guard,
-)
+from .guardrails import before_model_guard
 
 def after_model_callback_def(callback_context: CallbackContext, llm_response: LlmResponse
 ) -> Optional[LlmResponse]:
     """
     After the model produces output, this callback just save the response in state.
     """
+    callback_context.state["main_agent_response"] = callback_context.user_id
        # Validate structure safely
     if (
         not llm_response
@@ -46,12 +45,29 @@ def after_model_callback_def(callback_context: CallbackContext, llm_response: Ll
     
     return None
 
+
+
+def before_agent_callback_def(callback_context: CallbackContext):
+    """
+    Before the agent takes an action, this saves user_id for reporting.
+    """
+    span = trace.get_current_span()
+
+    user_email = callback_context._invocation_context.user_id  # or your own logic
+    
+    if span and user_email:
+        span.set_attribute("user.email", user_email)
+
+    span.set_attribute("agent.transactionid", "1234")
+    return None
+
 root_agent = LlmAgent(
     name="email_intake_poc",
     model=settings.GOOGLE_MODEL,tools=[submit_rma] ,
     instruction=main_agent_instruction,
     sub_agents=[email_agent, bigquery_retrieval_agent],
     before_model_callback=before_model_guard,# Gaurdrails call
+    before_agent_callback=before_agent_callback_def,
     #after_model_callback=after_model_callback_def
     #tools=[read_unread_inbox, read_latest_inbox, read_message_full],
 )
