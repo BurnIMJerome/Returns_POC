@@ -50,7 +50,7 @@ HTML = """
     --bg: var(--ingram-light-blue);
     --panel: #fff;
     --panel2: #f4f8fb;
-    --border: #0071ce;
+    --border: #4a4a4a; /* Changed to dark grey */
     --text: #003b70;
     --muted: #5a7ca7;
     --accent: #0071ce;
@@ -68,18 +68,16 @@ HTML = """
     color:#fff;
   }
 
-
   .wrap{
     max-width: 980px;
     margin: 0 auto;
     padding: 22px 16px 28px;
     background: var(--panel);
-    border-radius: 18px;
+    border-radius: 0; /* Removed rounded corners */
     box-shadow: var(--shadow);
     border: 2px solid var(--border);
     color: #fff;
   }
-
 
   .topbar{
     display:flex;
@@ -91,19 +89,17 @@ HTML = """
     padding-bottom: 10px;
   }
 
-
   .brand{
     display:flex;
     align-items:center;
     gap:12px;
   }
 
-
   .logo-img{
     width:60px;
     height:60px;
     object-fit:contain;
-    border-radius:10px;
+    border-radius:0; /* Removed rounded corners */
     display:block;
     flex-shrink:0;
     margin:0;
@@ -139,7 +135,7 @@ HTML = """
     padding:10px 12px;
     border:1px solid var(--border);
     background: rgba(15,23,42,.6);
-    border-radius: 999px;
+    border-radius: 0; /* Removed rounded corners */
     box-shadow: 0 6px 18px rgba(0,0,0,.20);
     font-size:12px;
     color:#fff;
@@ -164,7 +160,7 @@ HTML = """
   .card{
     border:1px solid var(--border);
     background: linear-gradient(180deg, rgba(15,23,42,.75), rgba(11,18,32,.75));
-    border-radius: 20px;
+    border-radius: 0; /* Removed rounded corners */
     box-shadow: var(--shadow);
     overflow:hidden;
   }
@@ -212,7 +208,7 @@ HTML = """
     font-weight: bold;
     text-shadow: 0 1px 4px rgba(0,0,0,0.18);
     padding:8px 10px;
-    border-radius: 12px;
+    border-radius: 0; /* Removed rounded corners */
     cursor:pointer;
     font-size:12px;
     transition: transform .08s ease, background .15s ease;
@@ -451,13 +447,13 @@ HTML = """
   <div class="wrap">
     <div class="topbar">
       <div class="brand">
-  <img src="/static/ingram_logo.png" class="logo-img" alt="Ingram Micro Logo" onerror="this.onerror=null;this.src='https://upload.wikimedia.org/wikipedia/commons/2/2b/Ingram_Micro_logo.svg';">
+  <img src="/static/ingram_logo.png" class="logo-img" alt="Ingram Micro Logo">
         <div class="title">
           <h1>Ingram Micro</h1>
           <span>RMA Agent • Internal Demo</span>
         </div>
       </div>
-
+python -m email_intake_poc.server
       <div class="pill" id="connPill" title="Backend connection">
         <span class="dot" id="connDot"></span>
         <span id="connText">Ready</span>
@@ -541,7 +537,12 @@ function addMsg(role, text, meta){
 
   const bubble = document.createElement("div");
   bubble.className = "bubble " + (role === "me" ? "me" : "bot");
-  bubble.textContent = text;
+  // Always render bot messages as HTML to support all output formats (tables, divs, etc)
+  if (role === "bot") {
+    bubble.innerHTML = text;
+  } else {
+    bubble.textContent = text;
+  }
 
   const m = document.createElement("div");
   m.className = "meta";
@@ -688,7 +689,7 @@ async function send(){
   }
 }
 
-addMsg("bot", "Hi! I’m Rosana. Ask me anything, and I’ll respond using your ADK agent.", "Welcome");
+addMsg("bot", "Hi! I’m IRA. Ask me anything, and I’ll respond using your ADK agent.", "Welcome");
 </script>
 </body>
 </html>

@@ -3,6 +3,8 @@ from google.adk.tools.agent_tool import AgentTool
 from .sub_agents.email_agent.agent import email_agent
 from .sub_agents.bigquery_insert_agent.agent import bigquery_insert_agent
 from .sub_agents.bigquery_retrieval_agent.agent import bigquery_retrieval_agent
+from email_intake_poc.tools.rma_tool import submit_rma
+
 from .instruction import main_agent_instruction
 from .config import settings
 from google.adk.models import LlmResponse
@@ -46,10 +48,10 @@ def after_model_callback_def(callback_context: CallbackContext, llm_response: Ll
 
 root_agent = LlmAgent(
     name="main_agent",
-    model=settings.GOOGLE_MODEL,
+    model=settings.GOOGLE_MODEL,tools=[submit_rma] ,
     instruction=main_agent_instruction,
     sub_agents=[email_agent, bigquery_retrieval_agent],
-    before_model_callback=before_model_guard, # Gaurdrails call
+    before_model_callback=before_model_guard,# Gaurdrails call
     #after_model_callback=after_model_callback_def
     #tools=[read_unread_inbox, read_latest_inbox, read_message_full],
 )
