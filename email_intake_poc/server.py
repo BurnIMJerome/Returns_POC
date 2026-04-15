@@ -50,7 +50,7 @@ HTML = """
     --bg: var(--ingram-light-blue);
     --panel: #fff;
     --panel2: #f4f8fb;
-    --border: #0071ce;
+    --border: #4a4a4a; /* Changed to dark grey */
     --text: #003b70;
     --muted: #5a7ca7;
     --accent: #0071ce;
@@ -68,18 +68,16 @@ HTML = """
     color:#fff;
   }
 
-
   .wrap{
     max-width: 980px;
     margin: 0 auto;
     padding: 22px 16px 28px;
     background: var(--panel);
-    border-radius: 18px;
+    border-radius: 0; /* Removed rounded corners */
     box-shadow: var(--shadow);
     border: 2px solid var(--border);
     color: #fff;
   }
-
 
   .topbar{
     display:flex;
@@ -91,19 +89,17 @@ HTML = """
     padding-bottom: 10px;
   }
 
-
   .brand{
     display:flex;
     align-items:center;
     gap:12px;
   }
 
-
   .logo-img{
     width:60px;
     height:60px;
     object-fit:contain;
-    border-radius:10px;
+    border-radius:0; /* Removed rounded corners */
     display:block;
     flex-shrink:0;
     margin:0;
@@ -139,7 +135,7 @@ HTML = """
     padding:10px 12px;
     border:1px solid var(--border);
     background: rgba(15,23,42,.6);
-    border-radius: 999px;
+    border-radius: 0; /* Removed rounded corners */
     box-shadow: 0 6px 18px rgba(0,0,0,.20);
     font-size:12px;
     color:#fff;
@@ -164,7 +160,7 @@ HTML = """
   .card{
     border:1px solid var(--border);
     background: linear-gradient(180deg, rgba(15,23,42,.75), rgba(11,18,32,.75));
-    border-radius: 20px;
+    border-radius: 0; /* Removed rounded corners */
     box-shadow: var(--shadow);
     overflow:hidden;
   }
@@ -212,7 +208,7 @@ HTML = """
     font-weight: bold;
     text-shadow: 0 1px 4px rgba(0,0,0,0.18);
     padding:8px 10px;
-    border-radius: 12px;
+    border-radius: 0; /* Removed rounded corners */
     cursor:pointer;
     font-size:12px;
     transition: transform .08s ease, background .15s ease;

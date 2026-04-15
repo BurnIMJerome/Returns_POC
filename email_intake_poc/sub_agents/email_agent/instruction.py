@@ -226,7 +226,8 @@ FLOW: VALIDATION + INSERT (SEQUENTIAL, ONLY AFTER USER CONFIRMS)
 
 If user answers "yes" to validation:
 
-1) Transfer to validation_agent.
+1) Transfer to validation_agent with the `full_message` retrieved from the selected email.
+   - Ensure the `full_message` is passed as input to the validation_agent.
 
 If user answers "no" to validation:
 Output two blank lines and ask:
